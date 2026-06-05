@@ -67,6 +67,69 @@ public class Triangle : Point
         X3 = cx + (X3 - cx) * factor; Y3 = cy + (Y3 - cy) * factor;
     }
 
+    public override bool Intersects(Figure other)
+    {
+        return other switch
+        {
+            Triangle t => TrianglesIntersect(this, t),
+            Point p => IsPointInside(p.X, p.Y),
+            _ => false
+        };
+    }
+
+    //Перевірка перетину двох трикутників
+    private static bool TrianglesIntersect(Triangle a, Triangle b)
+    {
+        //Вершини одного трикутника всередині іншого
+        if (b.IsPointInside(a.X, a.Y) || b.IsPointInside(a.X2, a.Y2) || b.IsPointInside(a.X3, a.Y3))
+            return true;
+        if (a.IsPointInside(b.X, b.Y) || a.IsPointInside(b.X2, b.Y2) || a.IsPointInside(b.X3, b.Y3))
+            return true;
+
+        //Перетин ребер
+        (double, double, double, double)[] edgesA =
+            [(a.X, a.Y, a.X2, a.Y2), (a.X2, a.Y2, a.X3, a.Y3), (a.X3, a.Y3, a.X, a.Y)];
+        (double, double, double, double)[] edgesB =
+            [(b.X, b.Y, b.X2, b.Y2), (b.X2, b.Y2, b.X3, b.Y3), (b.X3, b.Y3, b.X, b.Y)];
+
+        foreach (var (ax1, ay1, ax2, ay2) in edgesA)
+            foreach (var (bx1, by1, bx2, by2) in edgesB)
+                if (SegmentsIntersect(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2))
+                    return true;
+
+        return false;
+    }
+
+    //Перевірка перетину двох відрізків
+    private static bool SegmentsIntersect(
+        double ax1, double ay1, double ax2, double ay2,
+        double bx1, double by1, double bx2, double by2)
+    {
+        double d1 = Cross(bx1, by1, bx2, by2, ax1, ay1);
+        double d2 = Cross(bx1, by1, bx2, by2, ax2, ay2);
+        double d3 = Cross(ax1, ay1, ax2, ay2, bx1, by1);
+        double d4 = Cross(ax1, ay1, ax2, ay2, bx2, by2);
+
+        if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+            ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0)))
+            return true;
+
+        //Колінеарні випадки
+        if (Math.Abs(d1) < 1e-9 && OnSegment(bx1, by1, bx2, by2, ax1, ay1)) return true;
+        if (Math.Abs(d2) < 1e-9 && OnSegment(bx1, by1, bx2, by2, ax2, ay2)) return true;
+        if (Math.Abs(d3) < 1e-9 && OnSegment(ax1, ay1, ax2, ay2, bx1, by1)) return true;
+        if (Math.Abs(d4) < 1e-9 && OnSegment(ax1, ay1, ax2, ay2, bx2, by2)) return true;
+
+        return false;
+    }
+
+    private static double Cross(double ox, double oy, double ax, double ay, double bx, double by)
+        => (ax - ox) * (by - oy) - (ay - oy) * (bx - ox);
+
+    private static bool OnSegment(double px, double py, double qx, double qy, double rx, double ry)
+        => Math.Min(px, qx) <= rx && rx <= Math.Max(px, qx) &&
+           Math.Min(py, qy) <= ry && ry <= Math.Max(py, qy);
+
     public void MoveTo(double newX, double newY)
     {
         double cx = (X + X2 + X3) / 3, cy = (Y + Y2 + Y3) / 3;
@@ -92,7 +155,7 @@ public class Triangle : Point
     }
 
     //Перевірка точки всередині трикутника
-    protected bool IsPointInside(double px, double py)
+    public bool IsPointInside(double px, double py)
     {
         double d1 = CrossSign(px, py, X, Y, X2, Y2);
         double d2 = CrossSign(px, py, X2, Y2, X3, Y3);

@@ -1,6 +1,5 @@
 namespace lb3_4TEST.Figures;
 
-//Абстрактний базовий клас Фігура
 public abstract class Figure
 {
     public abstract double Area { get; }
@@ -9,6 +8,8 @@ public abstract class Figure
     public abstract void Move(double dx, double dy);
     public abstract void Scale(double factor);
     public abstract void Draw(char[,] canvas, int offsetX = 0, int offsetY = 0);
+
+    public virtual bool Intersects(Figure other) => false;
 
     public virtual string GetName() => "Фігура";
 
@@ -36,6 +37,43 @@ public abstract class Figure
             Console.Write('|');
             for (int x = 0; x < w; x++)
                 Console.Write(canvas[y, x]);
+            Console.WriteLine('|');
+        }
+        Console.WriteLine("+" + new string('-', w) + "+");
+    }
+
+    public static ConsoleColor[,] CreateColorCanvas(int width, int height,
+        ConsoleColor defaultColor = ConsoleColor.Gray)
+    {
+        var colors = new ConsoleColor[height, width];
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                colors[y, x] = defaultColor;
+        return colors;
+    }
+
+    //Вивести канвас у консоль з кольорами
+    public static void PrintCanvas(char[,] canvas, ConsoleColor[,] colors)
+    {
+        int h = canvas.GetLength(0), w = canvas.GetLength(1);
+        Console.WriteLine("+" + new string('-', w) + "+");
+        for (int y = 0; y < h; y++)
+        {
+            Console.Write('|');
+            for (int x = 0; x < w; x++)
+            {
+                if (canvas[y, x] != ' ' && colors[y, x] != ConsoleColor.Gray)
+                {
+                    var prev = Console.ForegroundColor;
+                    Console.ForegroundColor = colors[y, x];
+                    Console.Write(canvas[y, x]);
+                    Console.ForegroundColor = prev;
+                }
+                else
+                {
+                    Console.Write(canvas[y, x]);
+                }
+            }
             Console.WriteLine('|');
         }
         Console.WriteLine("+" + new string('-', w) + "+");

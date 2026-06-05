@@ -10,7 +10,7 @@ public class Image
     public double Width { get; set; }
     public double Height { get; set; }
 
-    private readonly List<Figure> figures = new();
+    public readonly List<Figure> figures = new();
 
     public Image(double x = 0, double y = 0, double width = 60, double height = 25)
     {
@@ -66,6 +66,71 @@ public class Image
         foreach (var f in figures)
             f.Draw(canvas, (int)X, (int)Y);
         Figure.PrintCanvas(canvas);
+    }
+
+    public void CheckForPeretin(int figureIndex)
+    {
+        if (figureIndex < 0 || figureIndex >= figures.Count)
+            throw new IndexOutOfRangeException("Невірний індекс фігури");
+
+        var target = figures[figureIndex];
+        var intersecting = new HashSet<int>();
+
+        Console.WriteLine($"\n  Перевірка перетину для фігури [{figureIndex}]: {target}");
+
+        for (int i = 0; i < figures.Count; i++)
+        {
+            if (i == figureIndex) continue;
+            if (target.Intersects(figures[i]))
+            {
+                intersecting.Add(i);
+                Console.WriteLine($"\t\tПеретинається з [{i}]: {figures[i].GetName()}");
+            }
+            else
+            {
+                Console.WriteLine($"\t\tНе перетинається з [{i}]: {figures[i].GetName()}");
+            }
+        }
+
+        if (intersecting.Count == 0)
+            Console.WriteLine("    (жодного перетину не знайдено)");
+
+        int w = (int)Width, h = (int)Height;
+        var canvas = Figure.CreateCanvas(w, h);
+        var colors = Figure.CreateColorCanvas(w, h);
+
+        for (int i = 0; i < figures.Count; i++)
+        {
+            if (i == figureIndex || intersecting.Contains(i)) continue;
+            figures[i].Draw(canvas, (int)X, (int)Y);
+        }
+
+        foreach (int i in intersecting)
+        {
+            var tempCanvas = Figure.CreateCanvas(w, h);
+            figures[i].Draw(tempCanvas, (int)X, (int)Y);
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    if (tempCanvas[y, x] != ' ')
+                    {
+                        canvas[y, x] = tempCanvas[y, x];
+                        colors[y, x] = ConsoleColor.Red;
+                    }
+        }
+
+        {
+            var tempCanvas = Figure.CreateCanvas(w, h);
+            target.Draw(tempCanvas, (int)X, (int)Y);
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    if (tempCanvas[y, x] != ' ')
+                    {
+                        canvas[y, x] = tempCanvas[y, x];
+                        colors[y, x] = ConsoleColor.Red;
+                    }
+        }
+
+        Figure.PrintCanvas(canvas, colors);
     }
 
     public override string ToString()

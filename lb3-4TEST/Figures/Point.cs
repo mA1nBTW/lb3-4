@@ -20,6 +20,16 @@ public class Point : Figure
     public double DistanceTo(Point other) =>
         Math.Sqrt(Math.Pow(X - other.X, 2) + Math.Pow(Y - other.Y, 2));
 
+    public override bool Intersects(Figure other)
+    {
+        return other switch
+        {
+            Triangle t => t.IsPointInside(X, Y),
+            Point p => Math.Abs(X - p.X) < 1 && Math.Abs(Y - p.Y) < 1,
+            _ => false
+        };
+    }
+
     public override string GetName() => "Точка";
 
     public override string ToString() =>
