@@ -108,8 +108,8 @@ Console.WriteLine(image);
 image.DrawAll();
 
 //Масштабування
-Console.WriteLine("\n  Після ScaleImage(0.8):");
-image.ScaleImage(0.8);
+Console.WriteLine("\n  Після ScaleImage(1.2):");
+image.ScaleImage(1.2);
 Console.WriteLine(image);
 image.DrawAll();
 
