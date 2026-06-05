@@ -3,13 +3,8 @@ using lb3_4TEST.Figures;
 
 namespace lb3_4TEST;
 
-/// <summary>
-/// Клас «Зображення» — має положення, розмір та колекцію фігур.
-/// Підтримує збереження/завантаження з файлу.
-/// </summary>
 public class Image
 {
-    // ── Поля ───────────────────────────────────────────
     public double X { get; set; }
     public double Y { get; set; }
     public double Width { get; set; }
@@ -17,44 +12,31 @@ public class Image
 
     private readonly List<Figure> figures = new();
 
-    // ── Конструктор ────────────────────────────────────
     public Image(double x = 0, double y = 0, double width = 60, double height = 25)
     {
         X = x; Y = y; Width = width; Height = height;
     }
 
-    // ── Властивості ────────────────────────────────────
     public int Count => figures.Count;
 
-    // ── Індексатор ─────────────────────────────────────
     public Figure this[int index]
     {
         get => figures[index];
         set => figures[index] = value;
     }
 
-    // ── Методи роботи з колекцією ─────────────────────
     public void Add(Figure f) => figures.Add(f);
     public void Remove(Figure f) => figures.Remove(f);
     public void Clear() => figures.Clear();
 
-    // ── Методи переміщення ─────────────────────────────
 
-    /// <summary>Перемістити всі фігури всередині зображення.</summary>
     public void MoveAllFigures(double dx, double dy)
     {
         foreach (var f in figures) f.Move(dx, dy);
     }
 
-    /// <summary>Перемістити саме зображення.</summary>
     public void MoveImage(double dx, double dy) { X += dx; Y += dy; }
 
-    // ── Масштабування ──────────────────────────────────
-
-    /// <summary>
-    /// Масштабувати зображення зі збереженням пропорцій.
-    /// Змінює розмір та масштабує всі фігури відносно центру.
-    /// </summary>
     public void ScaleImage(double factor)
     {
         double cx = Width / 2, cy = Height / 2;
@@ -63,16 +45,12 @@ public class Image
 
         foreach (var f in figures)
         {
-            // Перемістити відносно центру, масштабувати, повернути
             f.Move(-cx, -cy);
             f.Scale(factor);
             f.Move(cx * factor, cy * factor);
         }
     }
 
-    // ── Об'єднання зображень ──────────────────────────
-
-    /// <summary>Об'єднати з іншим зображенням (додати всі фігури).</summary>
     public void Merge(Image other)
     {
         foreach (var f in other.figures)
@@ -82,9 +60,6 @@ public class Image
         Height = Math.Max(Height, other.Height);
     }
 
-    // ── Малювання ──────────────────────────────────────
-
-    /// <summary>Намалювати всі фігури на канвасі та вивести в консоль.</summary>
     public void DrawAll()
     {
         var canvas = Figure.CreateCanvas((int)Width, (int)Height);
@@ -92,8 +67,6 @@ public class Image
             f.Draw(canvas, (int)X, (int)Y);
         Figure.PrintCanvas(canvas);
     }
-
-    // ── Стан об'єкта ───────────────────────────────────
 
     public override string ToString()
     {
@@ -104,13 +77,10 @@ public class Image
         return sb.ToString();
     }
 
-    // ══════════════════════════════════════════════════════
-    //  Збереження / Завантаження з файлу
-    // ══════════════════════════════════════════════════════
+    //Збереження / завантаження з файлу
 
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
-    /// <summary>Зберегти зображення у текстовий файл.</summary>
     public void SaveToFile(string path)
     {
         using var sw = new StreamWriter(path);
@@ -133,7 +103,6 @@ public class Image
         }
     }
 
-    /// <summary>Завантажити зображення з текстового файлу.</summary>
     public static Image LoadFromFile(string path)
     {
         using var sr = new StreamReader(path);
@@ -159,7 +128,7 @@ public class Image
         return img;
     }
 
-    // Скорочення для форматування/парсингу з InvariantCulture
+    //Скорочення для форматування/парсингу з InvariantCulture
     private static string Fmt(double v) => v.ToString("F4", Inv);
     private static double Prs(string s) => double.Parse(s, Inv);
 }
